@@ -14,7 +14,7 @@
     "react": "latest",
     "react-dom": "latest",
     "tailwind-merge": "latest",
-    "zod": "latest"
+    "zod": "latest",
     "resend": "^4.0.1"
   },
   "devDependencies": {
