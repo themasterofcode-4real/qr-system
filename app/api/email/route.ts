@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
@@ -20,67 +22,31 @@ Result: ${body.result}
 Reason: ${body.reason ?? 'N/A'}
 `;
 
-    console.log('========================================');
-    console.log('QR ACCESS EMAIL REQUEST');
-    console.log('Recipient: Joseph.negri2014@gmail.com');
-    console.log('Subject:', subject);
-    console.log('========================================');
-
-    if (
-      !process.env.SMTP_HOST ||
-      !process.env.SMTP_USER ||
-      !process.env.SMTP_PASS
-    ) {
-      console.error('SMTP environment variables missing');
-
+    if (!process.env.RESEND_API_KEY) {
       return NextResponse.json(
         {
           ok: false,
-          error:
-            'Missing SMTP_HOST, SMTP_USER, or SMTP_PASS environment variables'
+          error: 'RESEND_API_KEY not configured'
         },
         { status: 500 }
       );
     }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT ?? 587),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-      }
-    });
-
-    console.log('Verifying SMTP connection...');
-
-    await transporter.verify();
-
-    console.log('SMTP verified successfully');
-
-    const info = await transporter.sendMail({
-      from:
-        process.env.EMAIL_FROM ??
-        `"QR Access Kiosk" <${process.env.SMTP_USER}>`,
-      to: 'Joseph.negri2014@gmail.com',
+    const result = await resend.emails.send({
+      from: 'QR Access Kiosk <onboarding@resend.dev>',
+      to: ['Joseph.negri2014@gmail.com'],
       subject,
       text
     });
 
-    console.log('Email sent successfully');
-    console.log('Message ID:', info.messageId);
+    console.log('Resend result:', result);
 
     return NextResponse.json({
       ok: true,
-      messageId: info.messageId,
-      recipient: 'Joseph.negri2014@gmail.com'
+      result
     });
   } catch (error) {
-    console.error('========================================');
-    console.error('EMAIL FAILURE');
-    console.error(error);
-    console.error('========================================');
+    console.error('EMAIL ERROR:', error);
 
     return NextResponse.json(
       {
@@ -88,7 +54,7 @@ Reason: ${body.reason ?? 'N/A'}
         error:
           error instanceof Error
             ? error.message
-            : 'Unknown email error'
+            : String(error)
       },
       { status: 500 }
     );
