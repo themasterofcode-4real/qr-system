@@ -1,4 +1,5 @@
 "use client";
+import { checkBathroomAlert } from "@/lib/bathroomAlert";
 import type { RefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
@@ -34,6 +35,7 @@ type State =
   | "LOCATION_SELECTION"
   | "PROCESSING"
   | "RESULT"
+  | "ALERT"
   | "RESET";
 type Result = {
   granted: boolean;
@@ -47,6 +49,8 @@ export default function Home() {
   const [shutdown, setShutdown] = useState(false);
   const [user, setUser] = useState<UserRecord | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
   const [logs, setLogs] = useState<AccessLog[]>([]);
   const [adminOpen, setAdminOpen] = useState(false);
   const [admin, setAdmin] = useState(false);
@@ -414,6 +418,41 @@ function ResultScreen({ result }: { result: Result }) {
         <p>Destination: {result.destination}</p>
         {!result.granted && <p>Reason: {result.reason}</p>}
       </div>
+    </section>
+  );
+}
+function AlertScreen({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setFlash((v) => !v);
+    }, 250);
+
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <section
+      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center text-center text-white ${
+        flash ? "bg-red-700" : "bg-blue-700"
+      }`}
+    >
+      <div className="text-9xl mb-8">🚨</div>
+
+      <h1 className="text-8xl font-black">
+        {title}
+      </h1>
+
+      <p className="mt-8 text-4xl max-w-4xl px-10">
+        {message}
+      </p>
     </section>
   );
 }
