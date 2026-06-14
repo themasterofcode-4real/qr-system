@@ -3,10 +3,20 @@ import { Resend } from 'resend';
 
 export const runtime = 'nodejs';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: 'RESEND_API_KEY not configured'
+        },
+        { status: 500 }
+      );
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const body = await req.json();
 
     const subject = `[QR SYSTEM] ACCESS ${body.result} - ${body.name}`;
@@ -22,16 +32,6 @@ Result: ${body.result}
 Reason: ${body.reason ?? 'N/A'}
 `;
 
-    if (!process.env.RESEND_API_KEY) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: 'RESEND_API_KEY not configured'
-        },
-        { status: 500 }
-      );
-    }
-
     const result = await resend.emails.send({
       from: 'QR Access Kiosk <onboarding@resend.dev>',
       to: ['Joseph.negri2014@gmail.com'],
@@ -39,7 +39,7 @@ Reason: ${body.reason ?? 'N/A'}
       text
     });
 
-    console.log('Resend result:', result);
+    console.log('Email sent:', result);
 
     return NextResponse.json({
       ok: true,
