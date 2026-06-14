@@ -15,6 +15,7 @@
     "react-dom": "latest",
     "tailwind-merge": "latest",
     "zod": "latest"
+    "resend": "^4.0.1"
   },
   "devDependencies": {
     "@types/node": "latest",
