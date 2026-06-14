@@ -42,7 +42,7 @@ Reason: ${body.reason ?? 'N/A'}
 
     const result = await resend.emails.send({
       from: 'QR Access Kiosk <onboarding@resend.dev>',
-      to: ['Joseph.negri2014@gmail.com'],
+      to: ['joseph.negri2014@gmail.com'],
       subject,
       text
     });
