@@ -138,6 +138,25 @@ export default function Home() {
   }
   async function selectDestination(destination: Destination) {
     if (!user) return;
+    const alert = checkBathroomAlert(destination);
+    
+    if (alert.triggered) {
+      setAlertTitle(alert.title ?? "PLACEHOLDER TITLE");
+      setAlertMessage(alert.message ?? "PLACEHOLDER MESSAGE");
+    
+      speak(alert.tts ?? "PLACEHOLDER TTS");
+    
+      setState("ALERT");
+    
+      setTimeout(() => {
+        setState("HOME");
+        setUser(null);
+        setResult(null);
+        setQr("");
+      }, 8000);
+    
+      return;
+    }
     setState("PROCESSING");
     speak(`${destination} selected.`);
     const access = evaluateAccess(destination);
