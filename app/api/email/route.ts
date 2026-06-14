@@ -6,10 +6,12 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
   try {
     if (!process.env.RESEND_API_KEY) {
+      console.error('RESEND_API_KEY missing');
+
       return NextResponse.json(
         {
           ok: false,
-          error: 'RESEND_API_KEY not configured'
+          error: 'RESEND_API_KEY missing'
         },
         { status: 500 }
       );
@@ -32,6 +34,12 @@ Result: ${body.result}
 Reason: ${body.reason ?? 'N/A'}
 `;
 
+    console.log('================================');
+    console.log('SENDING EMAIL');
+    console.log('Subject:', subject);
+    console.log('Recipient: Joseph.negri2014@gmail.com');
+    console.log('================================');
+
     const result = await resend.emails.send({
       from: 'QR Access Kiosk <onboarding@resend.dev>',
       to: ['Joseph.negri2014@gmail.com'],
@@ -39,14 +47,20 @@ Reason: ${body.reason ?? 'N/A'}
       text
     });
 
-    console.log('Email sent:', result);
+    console.log('================================');
+    console.log('RESEND RESPONSE');
+    console.log(JSON.stringify(result, null, 2));
+    console.log('================================');
 
     return NextResponse.json({
       ok: true,
-      result
+      resendResult: result
     });
   } catch (error) {
-    console.error('EMAIL ERROR:', error);
+    console.error('================================');
+    console.error('EMAIL ERROR');
+    console.error(error);
+    console.error('================================');
 
     return NextResponse.json(
       {
