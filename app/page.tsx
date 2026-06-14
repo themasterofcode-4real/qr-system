@@ -264,7 +264,12 @@ export default function Home() {
           <Center title="PROCESSING" subtitle="Please wait..." />
         ) : state === "RESULT" && result ? (
           <ResultScreen result={result} />
-        ) : (
+        ) : state === "ALERT" ? (
+          <AlertScreen
+            title={alertTitle}
+            message={alertMessage}
+          />
+        )
           <Center title="RESETTING" subtitle="Returning home" />
         )}
         {adminOpen && (
